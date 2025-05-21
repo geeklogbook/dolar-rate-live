@@ -10,7 +10,7 @@ KAFKA_TOPIC = "dolar-data"
 
 producer = Producer({"bootstrap.servers": KAFKA_BROKER})
 
-API_URL = 'https://criptoya.com/api/dolar'
+API_URL = 'https://criptoya.com/api/BTC/USD'
 
 def fetch_and_send_data():
     try:
