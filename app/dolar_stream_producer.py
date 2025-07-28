@@ -2,7 +2,7 @@ import os
 import time
 import requests
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from confluent_kafka import Producer
 
 KAFKA_BROKER = os.getenv("KAFKA_BROKER", "kafka:9092")
@@ -18,7 +18,7 @@ def fetch_and_send_data():
         response.raise_for_status()
         data = response.json()
 
-        data["time"] = datetime.utcnow().isoformat()
+        data["time"] = datetime.now(timezone.utc).isoformat()
 
         json_data = json.dumps(data)
 

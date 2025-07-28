@@ -52,7 +52,7 @@ services:
     restart: always
     environment:
       - KAFKA_BROKER=kafka:9092
-    command: ["python", "dolar_stream_producer.py"]
+    command: ["python", "/app/dolar_stream_producer.py"]
     volumes:
       - ./app:/app
 
@@ -64,6 +64,7 @@ services:
     depends_on:
       - kafka
       - data-lake
+      - kafka-producer 
     restart: always
     environment:
       - KAFKA_BROKER=kafka:9092
@@ -71,7 +72,7 @@ services:
       - MINIO_ACCESS_KEY=minio
       - MINIO_SECRET_KEY=minio123
       - MINIO_BUCKET=dolar-data
-    command: ["python", "dolar_stream_consumer.py"]
+    command: ["python", "/app/dolar_stream_consumer.py"]
     volumes:
       - ./app:/app
 
