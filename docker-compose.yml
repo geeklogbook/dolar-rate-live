@@ -46,13 +46,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: kafka-producer
+    container_name: bitcoin-producer
     depends_on:
       - kafka
     restart: always
     environment:
       - KAFKA_BROKER=kafka:9092
-    command: ["python", "/app/dolar_stream_producer.py"]
+    command: ["python", "/app/btc_rates_producer.py"]
     volumes:
       - ./app:/app
 
@@ -60,7 +60,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: kafka-consumer
+    container_name: bitcoin-datalake-consumer
     depends_on:
       - kafka
       - data-lake
@@ -71,10 +71,56 @@ services:
       - MINIO_ENDPOINT=http://data-lake:9000
       - MINIO_ACCESS_KEY=minio
       - MINIO_SECRET_KEY=minio123
-      - MINIO_BUCKET=dolar-data
-    command: ["python", "/app/dolar_stream_consumer.py"]
+      - MINIO_BUCKET=bitcoin-data
+    command: ["python", "/app/btc_rates_datalake_consumer.py"]
+    volumes:
+      - ./app:/app
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: rates
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./app/init_postgres.sql:/docker-entrypoint-initdb.d/init.sql
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    ports:
+      - "8081:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
+
+  kafka-postgres-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bitcoin-rdbs-consumer
+    depends_on:
+      - kafka
+      - postgres
+      - kafka-producer 
+    restart: always
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=rates
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    command: ["python", "/app/btc_rates_postgres_consumer.py"]
     volumes:
       - ./app:/app
 
 volumes:
   minio_data:
+  postgres_data:

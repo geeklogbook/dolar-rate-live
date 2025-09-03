@@ -3,14 +3,13 @@ import json
 from confluent_kafka import Consumer, KafkaException
 import boto3
 
-KAFKA_BROKER = os.getenv("KAFKA_BROKER", "kafka:9092")
-KAFKA_TOPIC = "dolar-data"
+KAFKA_BROKER = "kafka:9092"
+KAFKA_TOPIC = "bitcoin-data"
 KAFKA_GROUP_ID = "minio-saver"
-
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "http://data-lake:9000")
-MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minio")
-MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minio123")
-MINIO_BUCKET = os.getenv("MINIO_BUCKET", "dolar-data")
+MINIO_ENDPOINT =  "http://data-lake:9000"
+MINIO_ACCESS_KEY = "minio"
+MINIO_SECRET_KEY = "minio123"
+MINIO_BUCKET = "bitcoin-data"
 
 s3_client = boto3.client(
     "s3",
@@ -31,7 +30,7 @@ def save_to_minio(data):
     try:
         json_data = json.dumps(data)
 
-        file_name = f"dolar_data_{data.get('time', 'unknown')}.json"
+        file_name = f"bitcoin_data_{data.get('time', 'unknown')}.json"
 
         s3_client.put_object(Bucket=MINIO_BUCKET, Key=file_name, Body=json_data)
         print(f"Guardado en MinIO: {file_name}")

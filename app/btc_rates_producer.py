@@ -5,8 +5,8 @@ import json
 from datetime import datetime, timezone
 from confluent_kafka import Producer
 
-KAFKA_BROKER = os.getenv("KAFKA_BROKER", "kafka:9092")
-KAFKA_TOPIC = "dolar-data"
+KAFKA_BROKER = "kafka:9092"
+KAFKA_TOPIC = "bitcoin-data"
 
 producer = Producer({"bootstrap.servers": KAFKA_BROKER})
 
@@ -17,12 +17,8 @@ def fetch_and_send_data():
         response = requests.get(API_URL, headers={'Content-Type': 'application/json'})
         response.raise_for_status()
         data = response.json()
-
         data["time"] = datetime.now(timezone.utc).isoformat()
-
         json_data = json.dumps(data)
-
-
         producer.produce(KAFKA_TOPIC, key=str(time.time()), value=json_data)
         producer.flush()  
         print(f"Mensaje enviado a Kafka: {json_data}")
