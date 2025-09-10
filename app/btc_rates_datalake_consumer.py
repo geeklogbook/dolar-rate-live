@@ -26,6 +26,13 @@ consumer = Consumer({
 
 consumer.subscribe([KAFKA_TOPIC])
 
+def create_bucket_if_not_exists():
+    try:
+        s3_client.head_bucket(Bucket=MINIO_BUCKET)
+    except:
+        s3_client.create_bucket(Bucket=MINIO_BUCKET)
+        print(f"Bucket '{MINIO_BUCKET}' creado")
+
 def save_to_minio(data):
     try:
         json_data = json.dumps(data)
@@ -40,6 +47,7 @@ def save_to_minio(data):
 
 if __name__ == "__main__":
     print("Esperando mensajes de Kafka...")
+    create_bucket_if_not_exists()
     while True:
         msg = consumer.poll(timeout=1.0)
         if msg is None:
