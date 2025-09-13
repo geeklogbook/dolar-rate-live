@@ -31,4 +31,4 @@ def fetch_and_send_data():
 if __name__ == "__main__":
     while True:
         fetch_and_send_data()
-        time.sleep(10)
+        time.sleep(2)
